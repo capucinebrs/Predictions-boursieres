@@ -33,6 +33,7 @@ Pour chaque bourse on a: ask prices/volumes et bid prices/volumes aux 5 premiers
 - LightGBM : modèle principal, bonne performance en local (score ~0.505) et un test final (score ~0.4947), qui nous place en 24ème position du challenge.
 - CatBoost : testé, avec résultats similaires, mais un moins bon score final.
 - XGBoost : résultats proches mais plus lent que un LightGBM
+- Blending entre un LightGBM et un LightGBM avec pondération de poids : On remarque avec une _Matrice de Confusion_ que le modèle non pondéré est fort sur les classes fréquentes. Le modèle pondéré est plus fort sur les classes rares. Le blending combine les deux pour un compromis optimal. Permet d'avoir des prédictions plus équilibrées, il prédit plus souvent les classes les plus rares. 
 
 ## Quelques observations qui justifient le rajout des nouvelles features : 
 
@@ -46,6 +47,12 @@ Pour chaque bourse on a: ask prices/volumes et bid prices/volumes aux 5 premiers
 - Le 'Trade price' donne une idée de la préssion acheteur/vendeur : si souvent au-dessus, **les acheteurs sont frustrés.**
 
 - Généralement on **veut éviter les marchés peu liquides** = **réduire le spread**
+
+## Cross-validation & Evaluation
+- Utilisation d’un train/test split
+- Confusion matrix utilisée pour analyser les erreurs par classe.
+- Pondération des classes via class_weight dans LightGBM testée (faible impact). 
+- Importance des features analysée.
 
 
 ## Potentielles pistes d'amélioration : 
