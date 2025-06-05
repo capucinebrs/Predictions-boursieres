@@ -15,9 +15,9 @@ Pour chaque bourse on a: ask prices/volumes et bid prices/volumes aux 5 premiers
 **Les 10 dernières transactions** : timestamp, bourse (venue), prix, quantité.
 
 ## Création de colonnes
-- _venue_frequence_10_ : Nb de fois que chaque plateforme/source_id est apparue dans les 10 dernieres transactions
-- _venue_frequence_5_ : Nb de fois que chaque plateforme/source_id est apparue dans les 5 dernieres transactions
-- _venue_frequence_3_ : Nb de fois que chaque plateforme/source_id est apparue dans les 3 dernieres transactions
+- _venue_frequence_10_ : La plateforme/source_id qui est apparue le plus souvent dans les 10 dernieres transactions
+- _venue_frequence_5_ : La plateforme/source_id qui est apparue le plus souvent dans les 5 dernieres transactions
+- _venue_frequence_3_ : La plateforme/source_id qui est apparue le plus souvent dans les 3 dernieres transactions
 - _liquidity_bid_ de 0 à 5 
 - _liquidity_ask_ de 0 à 5 
 - _total_liquidity_ de 0 à 5 : liquidité totale de chaque bourse
