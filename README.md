@@ -1,64 +1,136 @@
-# cfm_data_challenge
+# 📈 Prédiction de la prochaine place de transaction boursière
 
-Where will the next trade take place? : https://challengedata.ens.fr/participants/challenges/40/
+## 📌 Description
+Ce projet a été réalisé dans le cadre du **CFM Data Challenge**  
+(*Where will the next trade take place?* – ENS Challenge Data).
 
-L’objectif est de prédire sur quelle bourse (parmi six) la prochaine transaction aura lieu, en se basant sur les carnets d’ordres et les dix dernières transactions.
+L’objectif est de **prédire sur quelle bourse (parmi six) la prochaine transaction aura lieu**, à partir des informations issues des **carnets d’ordres** et des **transactions récentes**.  
+Ce problème s’inscrit dans un contexte de **microstructure des marchés financiers**, où la liquidité et la dynamique des ordres jouent un rôle central.
 
-# Données
-**Carnet d'Ordres (Order Book)**
-Un carnet d'ordres est la liste des ordres passées par les investisseurs : 
-  - bid : ordres d'achats
-  - ask : ordres de vente
+Lien du challenge :  
+https://challengedata.ens.fr/participants/challenges/40/
 
-Pour chaque bourse on a: ask prices/volumes et bid prices/volumes aux 5 premiers niveaux.
+---
 
-**Les 10 dernières transactions** : timestamp, bourse (venue), prix, quantité.
+## 📊 Données
+Les données sont composées de deux sources principales :
 
-## Création de colonnes
-- _venue_frequence_10_ : La plateforme/source_id qui est apparue le plus souvent dans les 10 dernieres transactions
-- _venue_frequence_5_ : La plateforme/source_id qui est apparue le plus souvent dans les 5 dernieres transactions
-- _venue_frequence_3_ : La plateforme/source_id qui est apparue le plus souvent dans les 3 dernieres transactions
-- _liquidity_bid_ de 0 à 5 
-- _liquidity_ask_ de 0 à 5 
-- _total_liquidity_ de 0 à 5 : liquidité totale de chaque bourse
-- _venue_with_max_bidsize_
-- _venue_with_max_asksize_
-- _venue_with_best_bid_ : la bourse avec le bid le plus elevé
-- _venue_with_best_ask_ : la bourse avec le ask le plus faible
-- _matching_venue_ de 0 à 5 : 6 colonnes binaires qui indiquent si une bourse a un ask_size=bid_size.
-- _venue_with_min_spread_
-- _venue_with_min_spread1_
+### Carnets d’ordres (Order Books)
+Pour chaque bourse :
+- prix et volumes **ask** (ordres de vente)
+- prix et volumes **bid** (ordres d’achat)
+- informations disponibles sur les **5 premiers niveaux** du carnet
 
-## Modèles testés
-- LightGBM : modèle principal, bonne performance en local (score ~0.505) et un test final (score ~0.4947), qui nous place en 24ème position du challenge.
-- CatBoost : testé, avec résultats similaires, mais un moins bon score final.
-- XGBoost : résultats proches mais plus lent que un LightGBM
-- Blending entre un LightGBM et un LightGBM avec pondération de poids : On remarque avec une _Matrice de Confusion_ que le modèle non pondéré est fort sur les classes fréquentes. Le modèle pondéré est plus fort sur les classes rares. Le blending combine les deux pour un compromis optimal. Permet d'avoir des prédictions plus équilibrées, il prédit plus souvent les classes les plus rares. 
+### Transactions récentes
+- 10 dernières transactions
+- timestamp
+- bourse (venue)
+- prix
+- quantité échangée
 
-## Quelques observations qui justifient le rajout des nouvelles features : 
+---
 
-- Plus un actif est **liquide**, on pourra l'acheter plus rapidement, en grande quantité et au prix que l'on demande
-- Si un actif est **peu liquide**, il y a peu d'ordres en face, donc il est plus compliqué de le vendre, on risque de payer plus cher (ou de vendre à perte)
-- Plus on a des volumes a differents niveaux de prix (_ask_size_ et _bid_size_), plus l'actif est liquide.
-- Plus le **spread est faible**, plus il y a des la concurrence sur le marché **donc plus l'actif est liquide**
-- On ne peut pas vendre plus cher que le ask = **Le BID est toujours inferieur ou egal au ASK**
-- faut gerer les ordres, donc la quantité a une importance aussi .
-- Le 'Trade Price' correspond à la difference entre le Prix du Trade (généralement = ask) et le aggregate mid-price (voir formule chatgpt/rajouter dans la diapo)
-- Le 'Trade price' donne une idée de la préssion acheteur/vendeur : si souvent au-dessus, **les acheteurs sont frustrés.**
+## 🎯 Objectif & Métrique
+- **Problème de classification multi-classes (6 bourses)**
+- Objectif : prédire la **venue** de la prochaine transaction
+- Évaluation basée sur le **score du challenge**
 
-- Généralement on **veut éviter les marchés peu liquides** = **réduire le spread**
+---
 
-## Cross-validation & Evaluation
-- Utilisation d’un train/test split
-- Confusion matrix utilisée pour analyser les erreurs par classe.
-- Pondération des classes via class_weight dans LightGBM testée (faible impact). 
-- Importance des features analysée.
+## 🧠 Méthodologie
 
+### Feature Engineering
+Création de variables décrivant la **liquidité**, la **pression acheteur/vendeur** et la dynamique des marchés :
 
-## Potentielles pistes d'amélioration : 
+- Fréquence d’apparition des venues :
+  - `venue_frequence_10`
+  - `venue_frequence_5`
+  - `venue_frequence_3`
 
-- rajouter le _avg_trade_price_ ou le _std_trade_price_
-- faire des études sur les _ts_last_update_ : si le carnet change rapidement, c'est à dire que les clients passent des ordres en continu, c'est un bon signe de liquidité
+- Indicateurs de liquidité :
+  - `liquidity_bid` (0 à 5)
+  - `liquidity_ask` (0 à 5)
+  - `total_liquidity` (0 à 5)
 
+- Variables liées au carnet d’ordres :
+  - `venue_with_max_bidsize`
+  - `venue_with_max_asksize`
+  - `venue_with_best_bid`
+  - `venue_with_best_ask`
+  - `venue_with_min_spread`
+  - `venue_with_min_spread1`
 
+- Variables binaires :
+  - `matching_venue` : 6 colonnes indiquant si `ask_size = bid_size` pour une venue
+
+Ces features permettent de capturer la structure du marché et le niveau de concurrence entre les différentes bourses.
+
+---
+
+## 🧪 Modèles testés
+- **LightGBM (modèle principal)**
+  - Score local ≈ **0.505**
+  - Score final ≈ **0.4947**
+  - Classement : **24ᵉ position** au challenge
+
+- CatBoost  
+  - Performances similaires, score final légèrement inférieur
+
+- XGBoost  
+  - Résultats proches, mais temps de calcul plus élevé
+
+### Blending
+Un **blending de deux modèles LightGBM** a été mis en place :
+- un modèle non pondéré, performant sur les classes fréquentes
+- un modèle pondéré, plus efficace sur les classes rares
+
+Le blending permet d’obtenir des prédictions **plus équilibrées**, comme observé via la matrice de confusion.
+
+---
+
+## 📈 Évaluation
+- Train / test split
+- Analyse via **matrice de confusion**
+- Étude de l’importance des features
+- Tests de pondération des classes (`class_weight`) avec impact limité
+
+---
+
+## 🧠 Interprétations clés
+- Plus un actif est liquide, plus il peut être échangé rapidement et à un prix proche du marché
+- Un spread faible indique une forte concurrence entre acheteurs et vendeurs
+- Un carnet profond (volumes élevés à différents niveaux de prix) est un signe de liquidité
+- Le **Trade Price** (différence entre le prix du trade et le mid-price agrégé) reflète la pression acheteur/vendeur
+
+---
+
+## 🔍 Perspectives d’amélioration
+- Ajout de nouvelles variables :
+  - moyenne du trade price
+  - écart-type du trade price
+- Étude dynamique du carnet via `ts_last_update`
+- Analyse temporelle plus fine de la liquidité
+
+---
+
+## 📂 Contenu du repository
+- notebooks et scripts : préparation des données, feature engineering, entraînement et évaluation
+- `README.md` : description du projet
+
+---
+
+## 🛠️ Technologies utilisées
+- Python
+- Pandas, NumPy
+- LightGBM
+- CatBoost
+- XGBoost
+- Scikit-learn
+
+---
+
+## 👩‍💻 Auteure
+Capucine Brisson  
+
+Projet réalisé dans le cadre du **CFM Data Challenge**
 
