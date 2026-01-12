@@ -60,9 +60,5 @@ Pour chaque bourse on a: ask prices/volumes et bid prices/volumes aux 5 premiers
 - rajouter le _avg_trade_price_ ou le _std_trade_price_
 - faire des études sur les _ts_last_update_ : si le carnet change rapidement, c'est à dire que les clients passent des ordres en continu, c'est un bon signe de liquidité
 
-**Pourquoi il est interessant d'etudier le comportement des individus/traders?**
-
-Le comportoment/pressions sur les acheteurs et les vendeurs nous donnent des informations sur la direction du marché. 
-Par exemple les _avg_trade_price_, _std_trade_price_ , capturent la volatilité récente et la diréction du marché: **ex:** si les derniers trades ont des prix élevés par rapport au mid-price, ça peut indiquer une pression acheteuse, et certaines plateformes sont peut-être plus favorables aux acheteurs.
 
 
